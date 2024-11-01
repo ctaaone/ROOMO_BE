@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  sdb:
+    image: sdb_image:latest
+    build: .
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${PG_US}
+      POSTGRES_PASSWORD: ${PG_PW}
+      POSTGRES_DB: main_db
+
+  vdb:
+    image: semitechnologies/weaviate:latest
+    environment:
+      WEAVIATE_HOST: "weaviate"
+      WEAVIATE_PORT: "5433"
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      QUERY_DEFAULTS: 'true'
+    ports:
+      - "5433:5433"

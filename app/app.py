@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 data = {
     "type" : "spaceList",
@@ -11,14 +13,14 @@ data = {
             "name": "공간 A",
             "description": "공간 A에 대한 설명입니다.",
             "location": "서울",
-            "reviews": ["리뷰 1", "리뷰 2"],
+            "reviews": ["리뷰 1", "리뷰 2", "리뷰 3"],
         },
         {
             "id": 2,
             "name": "공간 B",
             "description": "공간 B에 대한 설명입니다.",
             "location": "부산",
-            "reviews": ["리뷰 3", "리뷰 4"],
+            "reviews": ["리뷰 3", "리뷰 4", "리뷰 1"],
         },
     ]
 }
@@ -28,4 +30,4 @@ def user_agent_main():
     return jsonify(data)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=6000)

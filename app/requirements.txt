@@ -1,1 +1,7 @@
-Flask
+flask
+jsonify
+psycopg2-binary
+python-dotenv
+flask_cors
+openai
+requests

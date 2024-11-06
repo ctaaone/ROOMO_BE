@@ -5,9 +5,9 @@ services:
     image: sdb_image:latest
     build: .
     ports:
-      - "${PG_PT}:5432"
+      - "${PG_PORT}:5432"
     environment:
-      POSTGRES_USER: ${PG_US}
+      POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PW}
       POSTGRES_DB: main_db
     volumes:
@@ -19,6 +19,6 @@ services:
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
       QUERY_DEFAULTS: 'true'
     ports:
-      - "${WV_PT}:8080"
+      - "${WV_PORT}:8080"
     volumes:
       - ./wv_db:/var/lib/weaviate

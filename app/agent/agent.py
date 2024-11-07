@@ -1,6 +1,7 @@
 from openai import OpenAI
-import re, os
-from roles import useragent_main_role, useragent_request_role
+import re, os, json
+from .roles import useragent_main_role, useragent_request_role
+from db import search_spaces
 
 client = OpenAI()
 user_conversation_history = [{"role": "system", "content": useragent_main_role}]
@@ -16,7 +17,6 @@ def get_gpt(conversation, role, content="") :
     ret = response.choices[0].message
     conversation.append({"role": "assistant", "content": ret})
     return ret
-
 
 def useragent_main(content, tries):
     if tries > 5 :
@@ -48,20 +48,31 @@ def useragent_main(content, tries):
                 space_longti = tokens[3]
                 extra_req = tokens[4]
 
+                res_space_list = search_spaces(space_type, space_lati, space_longti, extra_req, user_id=0)
 
-
+                if len(res_space_list) == 0:
+                    user_conversation_history.append({"role": "assistant", "content": "조건에 맞는 공간이 없습니다."})
+                    return {"type": "text", "content": "조건에 맞는 공간이 없습니다." }
+                else :
+                    user_conversation_history.append({"role": "assistant", "content": json.dumps(res_space_list)})
+                    return {"type": "spaceList", "content": json.dumps(res_space_list)}
 
             # Space reservation
-            if "TYPE2" in tokens[0] :
+            elif "TYPE2" in tokens[0] :
                 None
 
             # Space inquiry
-            if "TYPE3" in tokens[0] :
+            elif "TYPE3" in tokens[0] :
                 None
+            
+            # Not in case, error
+            else :
+                raise Exception('Out of cases')
+            
         except Exception as e :
             print(f"Error calling ChatGPT API in proces: {e}")
             print("Retry useragent_main")
-            user_conversation_history = list(conversation_backup)
+            user_conversation_history = conversation_backup
             useragent_main(content, tries+1)
 
 

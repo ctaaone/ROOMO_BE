@@ -28,7 +28,7 @@ CREATE TABLE spaces (
     review_summary TEXT,
     description TEXT,
     agent_rule TEXT,
-    space_type SERIAL REFERENCES space_types(id) ON DELETE CASCADE
+    space_type TEXT
 );
 
 CREATE TABLE inquiries (

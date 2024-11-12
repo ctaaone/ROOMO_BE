@@ -1,12 +1,12 @@
 from .db import connect_maindb
 from .vectordb import search_near_vector
 
-def search_spaces(space_type, latitude, longtitude, extra_req, user_id) :
+def search_spaces(space_type, latitude, longtitude, user_id) :
     conn = connect_maindb()
     cur = conn.cursor()
 
     # cur.execute("""
-    #             SELECT id, name, latitude, longitude
+    #             SELECT id, name, location, address, abstract, desc_summary
     #             FROM spaces
     #             WHERE ST_DWithin(
     #                 geom,
@@ -16,7 +16,7 @@ def search_spaces(space_type, latitude, longtitude, extra_req, user_id) :
     #             """, (longitude, latitude))
 
     cur.execute("""
-                SELECT id, name, location, address, abstract
+                SELECT id, name, location, address, abstract, desc_summary
                 FROM spaces
                 WHERE space_type = %s
                 """, (space_type))
@@ -33,19 +33,22 @@ def search_spaces(space_type, latitude, longtitude, extra_req, user_id) :
             "name" : space[1],
             "location" : space[2],
             "address" : space[3],
-            "abstract" : space[4]
+            "abstract" : space[4],
+            "desc_summary": space[5]
         }
 
     if len(space_list) == 0 :
         return []
 
     # Process vector processing (recommend task)
+    # First extract space ids in list
     space_id_list = [row[0] for row in space_list]
-    space_recommend_list = search_near_vector(user_id, space_id_list)
 
-    # TODO : Additional user requests from space agent
+    # TODO : Using vector recommendation
+    # space_recommend_list = search_near_vector(user_id, space_id_list)
+    # Then pick recommended spaces from list
+    space_recommend_list = space_id_list[:10]
 
-
-    ret = [space_list_map[sid] for sid in space_recommend_list]
+    ret = [space_list_map[key] for key in space_recommend_list]
     return ret
 

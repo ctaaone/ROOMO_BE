@@ -4,7 +4,7 @@ from .roles import useragent_main_role, useragent_request_role, useragent_recomm
 from db import search_spaces
 
 client = OpenAI()
-user_conversation_history = [{"role": "system", "content": useragent_main_role}]
+user_conversation_history = []
 provider_conversation_history = []
 
 def get_gpt(conversation, role, user_content="") :
@@ -12,14 +12,14 @@ def get_gpt(conversation, role, user_content="") :
         conversation.append({"role": "user", "content": user_content})
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=conversation
+        messages=conversation + {"role": "system", "content": role}
     )
     ret = response.choices[0].message
     conversation.append({"role": "assistant", "content": ret})
     return ret
 
 
-def useragent_main(content, tries):
+def useragent_main(content, tries, user_id):
     
     # Restart threshold
     if tries > 5 :
@@ -54,7 +54,7 @@ def useragent_main(content, tries):
                 extra_req = tokens[4]
 
                 # Get spaces from db sorted by user preference vector
-                space_list = search_spaces(space_type, space_lati, space_longti, user_id=0)
+                space_list = search_spaces(space_type, space_lati, space_longti, user_id=user_id)
                 
                 # Select space based on extra request by user agent
                 if extra_req == "" : extra_req = "없음"

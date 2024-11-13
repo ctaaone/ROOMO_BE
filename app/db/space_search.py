@@ -5,6 +5,7 @@ def search_spaces(space_type, latitude, longtitude, user_id) :
     conn = connect_maindb()
     cur = conn.cursor()
 
+    # TODO ? Add geo search
     # cur.execute("""
     #             SELECT id, name, location, address, abstract, desc_summary
     #             FROM spaces
@@ -45,9 +46,9 @@ def search_spaces(space_type, latitude, longtitude, user_id) :
     space_id_list = [row[0] for row in space_list]
 
     # TODO : Using vector recommendation
-    # space_recommend_list = search_near_vector(user_id, space_id_list)
     # Then pick recommended spaces from list
-    space_recommend_list = space_id_list[:10]
+    space_recommend_list = search_near_vector(user_id, space_id_list)
+    # space_recommend_list = space_id_list[:10]
 
     ret = [space_list_map[key] for key in space_recommend_list]
     return ret

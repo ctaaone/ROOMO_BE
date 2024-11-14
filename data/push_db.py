@@ -1,6 +1,7 @@
 import psycopg2, os
 from dotenv import load_dotenv
 import csv
+from prompts import desc_summary_prompt
 
 roles="""
 

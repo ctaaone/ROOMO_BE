@@ -50,11 +50,11 @@ def useragent_main(content, tries, user_id):
             if "TYPE1" in tokens[0] :
                 space_type = tokens[1]
                 space_lati = tokens[2]
-                space_longti = tokens[3]
+                space_longi = tokens[3]
                 extra_req = tokens[4]
 
                 # Get spaces from db sorted by user preference vector
-                space_list = search_spaces(space_type, space_lati, space_longti, user_id=user_id)
+                space_list = search_spaces(space_type, space_lati, space_longi, user_id=user_id)
                 
                 # Select space based on extra request by user agent
                 if extra_req == "" : extra_req = "없음"

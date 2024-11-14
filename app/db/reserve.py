@@ -66,6 +66,7 @@ def write_user_review(space_id, user_id, content):
                 VALUES (%s, %s, %s) RETURNING id;
                 """, (user_id, space_id, content))
     new_id = cur.fetchone()[0]
+    conn.commit()
     cur.close()
     conn.close()
 

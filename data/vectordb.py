@@ -1,3 +1,4 @@
+# Provide vector db api
 import requests
 import json
 import uuid
@@ -7,7 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 WV_PORT = os.getenv("WV_PORT")
-WEAVIATE_URL = f"http://localhost:{WV_PORT}/v1"
+DB_HOST = os.getenv("DB_HOST")
+WEAVIATE_URL = f"http://{DB_HOST}:{WV_PORT}/v1"
 
 user_preferences_class = {
     "class": "UserPreferences",
@@ -99,7 +101,7 @@ def add_space_property(space_id, text_embedding):
     response = requests.post(f'{WEAVIATE_URL}/objects', json={
         "id" : sid,
         "class": "SpaceProperties",
-        "properties": { "space_id": space_id },
+        "properties": { "space_id": str(space_id) },
         "vector": text_embedding
     })
 

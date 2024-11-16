@@ -1,3 +1,4 @@
+# Select data from db
 import psycopg2, os
 from dotenv import load_dotenv
 import csv

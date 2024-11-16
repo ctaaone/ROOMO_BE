@@ -28,7 +28,9 @@ CREATE TABLE spaces (
     review_summary TEXT,
     description TEXT,
     agent_rule TEXT,
-    space_type TEXT
+    space_type TEXT,
+    price TEXT,
+    capacity TEXT
 );
 
 CREATE TABLE inquiries (

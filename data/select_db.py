@@ -21,7 +21,7 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 cur.execute("""
-            SELECT * FROM spaces;
+            SELECT * FROM reservations;
             """)
 
 res = cur.fetchall()

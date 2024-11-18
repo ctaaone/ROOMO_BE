@@ -139,9 +139,15 @@ def delete_space_property(space_id):
         print(f"Failed to delete space property: {response.content}")
 
 
-def search_near_vector(user_id, space_ids) :
+from dotenv import load_dotenv
+from openai import OpenAI
+load_dotenv()
+client = OpenAI()
+def search_near_vector(user_text, space_ids) :
     if len(space_ids) == 0: return []
-    user_vec = get_user_preferences(user_id)
+
+    user_vec = client.embeddings.create(input = [user_text.replace("\n", " ")], model="text-embedding-3-small").data[0].embedding
+    # user_vec = get_user_preferences(user_id)
     space_list = [str(uuid.uuid5(uuid.NAMESPACE_DNS, str(s)+"s")) for s in space_ids]
     query = """
     {

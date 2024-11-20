@@ -1,28 +1,30 @@
 from openai import OpenAI
 import re, os, json
-from .roles import useragent_main_role, useragent_request_role, useragent_recommend_role
-from db import search_spaces
+from .roles import useragent_main_role, useragent_request_role, useragent_recommend_role, useragent_reservation_role
+from db import search_spaces, user_reservation_put
+from dotenv import load_dotenv
 
+load_dotenv()
 client = OpenAI()
 user_conversation_history = []
 provider_conversation_history = []
 
 def get_gpt(conversation, role, user_content="") :
-    if user_content is not "" :
+    if user_content != "" :
         conversation.append({"role": "user", "content": user_content})
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=conversation + {"role": "system", "content": role}
+        messages=conversation + [{"role": "system", "content": role}]
     )
-    ret = response.choices[0].message
+    ret = response.choices[0].message.content
     conversation.append({"role": "assistant", "content": ret})
     return ret
 
-
 def useragent_main(content, tries, user_id):
-    
+    global user_conversation_history
+
     # Restart threshold
-    if tries > 5 :
+    if tries > 2 :
         return "에러 발생, 다시 시도해 주십시오."
     conversation_backup = list(user_conversation_history)
 
@@ -36,6 +38,8 @@ def useragent_main(content, tries, user_id):
         print(f"Error calling ChatGPT API: {e}")
         return "Error in ChatGPT API call."
     
+    print("Main agent result : ", res)
+
     # Request additional information to user
     if "!request!" in res :
         res = get_gpt(conversation=user_conversation_history,
@@ -49,34 +53,49 @@ def useragent_main(content, tries, user_id):
             # Space search
             if "TYPE1" in tokens[0] :
                 space_type = tokens[1]
-                space_lati = tokens[2]
-                space_longi = tokens[3]
+                resv_start = tokens[2]
+                resv_end = tokens[3]
                 extra_req = tokens[4]
 
-                # Get spaces from db sorted by user preference vector
-                space_list = search_spaces(space_type, space_lati, space_longi, user_id=user_id)
-                
-                # Select space based on extra request by user agent
+                ## Get spaces from db sorted by user preference vector ##
+                space_list = search_spaces(space_type, resv_start, resv_end, extra_req, user_id=user_id)
+                print("Space vector filetering complete : ", [{"space_id":e["space_id"], "name":e["name"]} for e in space_list])            
+                if space_list == [] :
+                    user_conversation_history.append({"role": "assistant", "content": "조건에 맞는 공간이 없습니다."})
+                    return {"type": "text", "content": "조건에 맞는 공간이 없습니다." }
+
+                ## Select space based on extra request by user agent ##
                 if extra_req == "" : extra_req = "없음"
-                space_agent_query = "공간 후보 목록 :\n" + json.dumps(space_list) + "사용자 요청 :\n" + extra_req
+                space_agent_query = "공간 후보 목록 :\n" + json.dumps(space_list, ensure_ascii=False) + "사용자 요청 :\n" + extra_req
                 user_conversation_history.append({"role": "assistant", "content": space_agent_query})
                 res_str = get_gpt(conversation=user_conversation_history, role=useragent_recommend_role)
-                 
-                # Parsing agent response and space list
-                res_space_id_list = [int(num) for num in re.search(r'\[(.*?)\]', res_str)]
-                agent_res = res_str[:res_str.find('[')]
-                res_space_list = [space_list[key] for key in res_space_id_list]
+                
+                print("Agent's final choices : ", res_str)
+                print(re.findall(r'\[///(\d+(?:\s\d+)*)///\]', res_str)[0].split())
+
+                ## Parsing agent response and space list ##
+                res_space_id_list = [int(num) for num in re.findall(r'\[///(\d+(?:\s\d+)*)///\]', res_str)[0].split()]
+                agent_res = res_str[:res_str.find('[///')]
+                res_space_list = [e for e in space_list if e["space_id"] in res_space_id_list]
 
                 if len(res_space_list) == 0:
                     user_conversation_history.append({"role": "assistant", "content": "조건에 맞는 공간이 없습니다."})
                     return {"type": "text", "content": "조건에 맞는 공간이 없습니다." }
                 else :
-                    user_conversation_history.append({"role": "assistant", "content": agent_res+json.dumps(res_space_list)})
-                    return {"type": "spaceList", "content": agent_res, "list": json.dumps(res_space_list)}
+                    user_conversation_history.append({"role": "assistant", "content": agent_res+json.dumps(res_space_list, ensure_ascii=False)})
+                    return {"type": "spaceList", "content": agent_res, "list": json.dumps(res_space_list, ensure_ascii=False)}
 
             # Space reservation
             elif "TYPE2" in tokens[0] :
-                None
+                space_id = tokens[1]
+                start_time = tokens[2]
+                end_time = tokens[3]
+                reserve_res = user_reservation_put(space_id=space_id, user_id=user_id, start_time=start_time, end_time=end_time)
+                if reserve_res is True :
+                    user_conversation_history.append({"role": "assistant", "content": f"공간id {space_id}에 대해 {start_time}부터 {end_time}의 예약에 성공했습니다."})
+                else :
+                    user_conversation_history.append({"role": "assistant", "content": "다른 예약이 있어 예약에 실패했습니다."})
+                return {"type": "text", "content": get_gpt(user_conversation_history, useragent_reservation_role) }
 
             # Space inquiry
             elif "TYPE3" in tokens[0] :
@@ -90,4 +109,4 @@ def useragent_main(content, tries, user_id):
             print(f"Error calling ChatGPT API in proces: {e}")
             print("Retry useragent_main")
             user_conversation_history = conversation_backup
-            useragent_main(content, tries+1)
+            return useragent_main(content, tries+1, user_id)

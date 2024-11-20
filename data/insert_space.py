@@ -14,7 +14,7 @@ DB_PASSWORD = os.getenv("PG_PW")
 DB_PORT = os.getenv("PG_PORT")
 
 client = OpenAI()
-conv1 = [{"role": "system", "content": "주어진 공간 설명을 요약해줘(핵심 내용을 포함해서 길어도 괜찮음). 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
+conv1 = [{"role": "system", "content": "주어진 공간 설명을 평문으로 정리해줘. 공간 설명에 관련된 내용들은 모두 포함하고, 그렇지 않은 내용은 포함하지 마. 길어도 괜찮음. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
 conv2 = [{"role": "system", "content": "주어진 공간 리뷰들을 요약해서 어떤 공간인지 간략히 설명해줘. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
 conv3 = [{"role": "system", "content": "주어진 공간 설명과 리뷰를 요약해서 3줄정도로 해당 공간이 어떤 공간인지 요약해줘. ~입니다체를 사용해. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
 def getGPT(content, conv):

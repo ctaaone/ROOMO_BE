@@ -1,2 +1,2 @@
 from .space_search import search_spaces
-from .reserve import user_reservation_list, get_user_review, write_user_review
+from .reservation import user_reservation_list, get_user_review, write_user_review, user_reservation_put, user_reservation_delete

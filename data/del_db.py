@@ -21,7 +21,10 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 cur.execute("""
-            DELETE FROM reservations;
+            DELETE FROM providers;
+            """)
+cur.execute("""
+            DELETE FROM spaces;
             """)
 
 conn.commit()

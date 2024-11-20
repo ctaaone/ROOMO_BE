@@ -1,16 +1,59 @@
 from .db import connect_maindb
 
+# Returns true if reservation success, false otherwise
+def user_reservation_put(user_id, space_id, start_time, end_time) :
+    user_id = str(user_id)
+    space_id = str(space_id)
+
+    # Check if reservation time is available
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                SELECT DISTINCT s.id
+                FROM spaces s JOIN reservations r
+                ON s.id = r.space_id AND s.id = %s
+                WHERE (r.start_time >= %s AND r.start_time < %s) OR (r.end_time > %s AND r.end_time <= %s) OR (r.start_time <= %s AND r.end_time >= %s) ;
+                """, (space_id, start_time, end_time, start_time, end_time, start_time, end_time))
+    res = cur.fetchall()
+    cur.close()
+    conn.close()
+    if res != [] : return False
+
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                INSERT INTO reservations (user_id, space_id, start_time, end_time)
+                VALUES (%s, %s, %s, %s);
+                """, (user_id, space_id, start_time, end_time))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return True
+
+def user_reservation_delete(resv_id) :
+    resv_id = str(resv_id)
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                DELETE FROM reservations
+                WHERE id = %s;
+                """, (resv_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def user_reservation_list(user_id) :
     user_id = str(user_id)
     conn = connect_maindb()
     cur = conn.cursor()
     cur.execute("""
                 SELECT r.id, r.space_id, r.start_time, r.end_time,
-                s.name, s.address, s.abstract, s.space_type
+                s.name, s.address, s.abstract, s.space_type, r.user_id
                 FROM reservations r
                 JOIN spaces s ON r.space_id = s.id
                 WHERE r.user_id = %s;
-                """, (user_id))
+                """, (user_id,))
     fetch_result = cur.fetchall()
     cur.close()
     conn.close()

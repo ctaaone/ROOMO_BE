@@ -55,7 +55,7 @@ def handle_user_clear():
 
 # Clear chat history
 @app.route('/clsProvider', methods=['GET'])
-def handle_user_clear():
+def handle_provider_clear():
     clear_provider_history()
     return jsonify({})
 

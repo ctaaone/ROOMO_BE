@@ -24,6 +24,7 @@ def get_gpt(conversation, role, user_content="") :
 
 def useragent_main(content, tries, user_id):
     global user_conversation_history
+    global provider_conversation_history
 
     # Restart threshold
     if tries > 2 :
@@ -127,3 +128,10 @@ def useragent_main(content, tries, user_id):
             print("Retry useragent_main")
             user_conversation_history = conversation_backup
             return useragent_main(content, tries+1, user_id)
+
+def clear_user_history() :
+    global user_conversation_history
+    user_conversation_history = []
+def clear_provider_history() :
+    global provider_conversation_history
+    provider_conversation_history = {}

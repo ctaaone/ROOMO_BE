@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from agent import useragent_main
+from agent import useragent_main, clear_provider_history, clear_user_history
 from db import user_get_reservation, user_get_review, put_review, delete_reservation, space_get_review
 
 load_dotenv()
@@ -46,6 +46,18 @@ def handle_user_review(space_id):
 
 # Provider side
 # TODO
+
+# Clear chat history
+@app.route('/clsUser', methods=['GET'])
+def handle_user_clear():
+    clear_user_history()
+    return jsonify({})
+
+# Clear chat history
+@app.route('/clsProvider', methods=['GET'])
+def handle_user_clear():
+    clear_provider_history()
+    return jsonify({})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)

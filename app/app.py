@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from agent import useragent_main
-from db import user_get_reservation, user_get_review, put_review, delete_reservation
+from db import user_get_reservation, user_get_review, put_review, delete_reservation, space_get_review
 
 load_dotenv()
 app = Flask(__name__)
@@ -28,6 +28,11 @@ def handle_user_reservation(user_id):
 @app.route('/reservation/<int:resv_id>', methods=['DELETE'])
 def handle_reservation(resv_id):
     return jsonify(delete_reservation(resv_id=resv_id))
+
+# List space review
+@app.route('/spaceReview/<int:space_id>', methods=['GET'])
+def handle_space_review(space_id):
+    return jsonify(space_get_review(space_id=space_id))
 
 # Write or read reviews
 @app.route('/review/<int:space_id>', methods=['GET', 'POST'])

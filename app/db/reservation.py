@@ -60,6 +60,8 @@ def user_get_reservation(user_id) :
 
     reservation_list = []
     for r in fetch_result :
+         if user_get_review(space_id=r[1], user_id=user_id)["exist"] == 1 : reviewed = 1
+         else : reviewed = 0
          reservation_list.append({
             "reservation_id" : r[0],
             "space_id" : r[1],
@@ -69,9 +71,25 @@ def user_get_reservation(user_id) :
             "space_address": r[5],
             "space_abstract": r[6],
             "space_type": r[7],
+            "reviewed": reviewed
         })
     
     return {"list" : reservation_list}
+
+def space_get_review(space_id) :
+    space_id = str(space_id)
+
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                SELECT review_id, content
+                FROM reviews
+                WHERE space_id = %s;
+                """, (space_id, ))
+    fetch_result = cur.fetchall()
+    cur.close()
+    conn.close()
+    return {"list": [{"review_id":e[0], "content":e[1]} for e in fetch_result]}
 
 def user_get_review(space_id, user_id):
     user_id = str(user_id)

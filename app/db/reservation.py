@@ -1,7 +1,7 @@
 from .db import connect_maindb
 
 # Returns true if reservation success, false otherwise
-def user_reservation_put(user_id, space_id, start_time, end_time) :
+def user_put_reservation(user_id, space_id, start_time, end_time) :
     user_id = str(user_id)
     space_id = str(space_id)
 
@@ -31,7 +31,7 @@ def user_reservation_put(user_id, space_id, start_time, end_time) :
 
     return True
 
-def user_reservation_delete(resv_id) :
+def delete_reservation(resv_id) :
     resv_id = str(resv_id)
     conn = connect_maindb()
     cur = conn.cursor()
@@ -43,7 +43,7 @@ def user_reservation_delete(resv_id) :
     cur.close()
     conn.close()
 
-def user_reservation_list(user_id) :
+def user_get_reservation(user_id) :
     user_id = str(user_id)
     conn = connect_maindb()
     cur = conn.cursor()
@@ -73,7 +73,7 @@ def user_reservation_list(user_id) :
     
     return {"list" : reservation_list}
 
-def get_user_review(space_id, user_id):
+def user_get_review(space_id, user_id):
     user_id = str(user_id)
     space_id = str(space_id)
 
@@ -98,7 +98,7 @@ def get_user_review(space_id, user_id):
         "content": fetch_result[0][1]
     }
 
-def write_user_review(space_id, user_id, content):
+def put_review(space_id, user_id, content):
     user_id = str(user_id)
     space_id = str(space_id)
 

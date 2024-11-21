@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from agent import useragent_main
-from db import user_reservation_list, get_user_review, write_user_review
+from db import user_get_reservation, user_get_review, put_review, delete_reservation
 
 load_dotenv()
 app = Flask(__name__)
@@ -20,19 +20,24 @@ def handle_user_agent():
     return jsonify(useragent_main(content=content, tries=0, user_id=user_id))
 
 # Read reservation list
-@app.route('/reservation', methods=['GET'])
-def handle_user_reservation():
-    return jsonify(user_reservation_list(user_id=user_id))
-    
+@app.route('/userReservation/<int:user_id>', methods=['GET'])
+def handle_user_reservation(user_id):
+    return jsonify(user_get_reservation(user_id=user_id))
+
+# Delete reservation
+@app.route('/reservation/<int:resv_id>', methods=['DELETE'])
+def handle_reservation(resv_id):
+    return jsonify(delete_reservation(resv_id=resv_id))
+
 # Write or read reviews
 @app.route('/review/<int:space_id>', methods=['GET', 'POST'])
 def handle_user_review(space_id):
     if request.method == 'GET':
-        return jsonify(get_user_review(space_id=space_id, user_id=user_id))
+        return jsonify(user_get_review(space_id=space_id, user_id=user_id))
     elif request.method == 'POST':
         data = request.get_json()
         content = data.get('content')
-        return jsonify({"review_id":write_user_review(space_id=space_id, user_id=user_id, content=content)})
+        return jsonify({"review_id":put_review(space_id=space_id, user_id=user_id, content=content)})
 
 # Provider side
 # TODO

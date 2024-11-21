@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_HOST = "localhost"
+DB_HOST = os.getenv("DB_HOST")
 DB_NAME = "main_db"
 DB_USER = os.getenv("PG_USER")
 DB_PASSWORD = os.getenv("PG_PW")
@@ -17,4 +17,3 @@ def connect_maindb() :
             password=DB_PASSWORD,
             port=DB_PORT
         )
-

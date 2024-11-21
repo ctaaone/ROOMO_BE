@@ -1,20 +1,22 @@
 from openai import OpenAI
 import re, os, json
-from .roles import useragent_main_role, useragent_request_role, useragent_recommend_role, useragent_reservation_role
-from db import search_spaces, user_reservation_put
+from .roles import useragent_main_role, useragent_request_role, useragent_recommend_role
+from .roles import useragent_reservation_role, useragent_inquiry_role
+from .roles import provider_inquiry_role
+from db import search_spaces, user_put_reservation, get_space_summary
 from dotenv import load_dotenv
 
 load_dotenv()
 client = OpenAI()
 user_conversation_history = []
-provider_conversation_history = []
+provider_conversation_history = {}
 
 def get_gpt(conversation, role, user_content="") :
     if user_content != "" :
         conversation.append({"role": "user", "content": user_content})
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=conversation + [{"role": "system", "content": role}]
+        messages=[{"role": "system", "content": role}] + conversation
     )
     ret = response.choices[0].message.content
     conversation.append({"role": "assistant", "content": ret})
@@ -90,7 +92,7 @@ def useragent_main(content, tries, user_id):
                 space_id = tokens[1]
                 start_time = tokens[2]
                 end_time = tokens[3]
-                reserve_res = user_reservation_put(space_id=space_id, user_id=user_id, start_time=start_time, end_time=end_time)
+                reserve_res = user_put_reservation(space_id=space_id, user_id=user_id, start_time=start_time, end_time=end_time)
                 if reserve_res is True :
                     user_conversation_history.append({"role": "assistant", "content": f"공간id {space_id}에 대해 {start_time}부터 {end_time}의 예약에 성공했습니다."})
                 else :
@@ -99,7 +101,22 @@ def useragent_main(content, tries, user_id):
 
             # Space inquiry
             elif "TYPE3" in tokens[0] :
-                None
+                space_id = int(tokens[1])
+                inquiry = tokens[2]
+                desc_summary, review_summary = get_space_summary(space_id)
+                
+                # Check space agent exists, otherwise create
+                if space_id not in provider_conversation_history :
+                    provider_conversation_history[space_id] = [{"role": "assistant", "content": f"공간에 대한 정보 :\n{desc_summary}\n 리뷰 요약 :\n{review_summary}"},]
+                else :
+                    provider_conversation_history[space_id][0] = {"role": "assistant", "content": f"공간에 대한 정보 :\n{desc_summary}\n 리뷰 요약 :\n{review_summary}"}
+                
+                ## Get answer from provider agent
+                provider_answer = get_gpt(conversation=provider_conversation_history[space_id], role=provider_inquiry_role, user_content=f"익명의 사용자 문의 : {inquiry}")
+                print("Answer from provider agent: ", provider_answer)
+                user_conversation_history.append({"role": "assistant", "content": "공간 제공자로부터의 답변 :\n" + provider_answer})
+                
+                return { "type": "text", "content": get_gpt(conversation=user_conversation_history, role=useragent_inquiry_role) }
             
             # Not in case, error
             else :

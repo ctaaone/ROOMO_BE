@@ -1,2 +1,2 @@
-from .space_search import search_spaces
-from .reservation import user_reservation_list, get_user_review, write_user_review, user_reservation_put, user_reservation_delete
+from .space import search_spaces, get_space_summary
+from .reservation import user_get_reservation, user_get_review, put_review, user_put_reservation, delete_reservation

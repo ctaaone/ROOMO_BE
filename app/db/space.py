@@ -1,6 +1,21 @@
 from .db import connect_maindb
 from .vectordb import search_near_vector
 
+# Fetch spaces desc_summary, review_summary
+def get_space_summary(space_id) :
+    space_id = str(space_id)
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                SELECT desc_summary, review_summary
+                FROM spaces
+                WHERE id = %s
+                """, (space_id,))
+    desc_summary, review_summary = cur.fetchall()[0]
+    cur.close()
+    conn.close()
+    return (desc_summary, review_summary)
+
 def search_spaces(space_type, resv_start, resv_end, extra_req, user_id) :
     # Fetch spaces that matches type & reservation time
     conn = connect_maindb()

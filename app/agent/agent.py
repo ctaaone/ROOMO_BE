@@ -11,7 +11,14 @@ client = OpenAI()
 user_conversation_history = []
 provider_conversation_history = {}
 
+GPT_LIMIT = 500
+gpt_usage = 0
+
 def get_gpt(conversation, role, user_content="") :
+    global gpt_usage
+    gpt_usage += 1
+    if gpt_usage > GPT_LIMIT :
+        raise Exception("GPT usage exceeded. Please Restart server")
     if user_content != "" :
         conversation.append({"role": "user", "content": user_content})
     response = client.chat.completions.create(

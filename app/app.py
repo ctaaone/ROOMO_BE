@@ -17,6 +17,9 @@ user_id = 0
 def handle_user_agent():
     data = request.get_json()
     content = data.get("content")
+    if content is None :
+        return jsonify({"error":"'content' is null"}), 400
+    print("POST receive: ", data)
     return jsonify(useragent_main(content=content, tries=0, user_id=user_id))
 
 # Read reservation list

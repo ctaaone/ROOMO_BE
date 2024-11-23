@@ -82,7 +82,7 @@ def space_get_review(space_id) :
     conn = connect_maindb()
     cur = conn.cursor()
     cur.execute("""
-                SELECT review_id, content
+                SELECT id, content
                 FROM reviews
                 WHERE space_id = %s;
                 """, (space_id, ))
@@ -98,7 +98,7 @@ def user_get_review(space_id, user_id):
     conn = connect_maindb()
     cur = conn.cursor()
     cur.execute("""
-                SELECT review_id, content
+                SELECT id, content
                 FROM reviews
                 WHERE user_id = %s AND space_id = %s;
                 """, (user_id, space_id))

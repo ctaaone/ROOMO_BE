@@ -1,5 +1,78 @@
 from .db import connect_maindb
-from .vectordb import search_near_vector
+from .vectordb import search_near_vector, update_space_property
+from .reservation import get_reviews
+from agent import get_gpt
+
+# Get & Update space info for providers
+def provider_get_space(provider_id) :
+    provider_id = str(provider_id)
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                SELECT name, address, description, space_type, price, capacity
+                FROM spaces
+                WHERE provider_id = %s
+                """, (provider_id,))
+    # Fetch only one for now
+    res_space = cur.fetchall()[0]
+    cur.close()
+    conn.close()
+    return {
+        "name":res_space[0],
+        "address":res_space[1],
+        "description":res_space[2],
+        "space_type":res_space[3],
+        "price":res_space[4],
+        "capacity":res_space[5]
+    }
+
+def provider_update_space(provider_id, space) :
+    provider_id = str(provider_id)
+    # Update only one for now
+    space_id = str(get_space_ids(provider_id=provider_id)[0])
+
+    ### Summarize & embedding update
+    conv1 = [{"role": "system", "content": "주어진 공간 설명을 평문으로 정리해줘. 공간 설명에 관련된 내용들은 모두 포함하고, 그렇지 않은 내용은 포함하지 마. 길어도 괜찮음. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
+    conv2 = [{"role": "system", "content": "주어진 공간 리뷰들을 요약해서 어떤 공간인지 간략히 설명해줘. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
+    conv3 = [{"role": "system", "content": "주어진 공간 설명과 리뷰를 요약해서 3줄정도로 해당 공간이 어떤 공간인지 요약해줘. ~입니다체를 사용해. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
+    reviews = get_reviews(space_id=space_id)
+    desc_summary = get_gpt(content=space["description"], conv=conv1)
+    review_summary = get_gpt(content='\n'.join(reviews), conv=conv2)
+    abstract = get_gpt(content=space["description"] + '\n리뷰 목록\n' + '\n'.join(reviews), conv=conv3)
+    update_space_property(space_id=space_id, text=desc_summary+review_summary)
+
+    ### Update main db
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                UPDATE spaces
+                SET name = %s, address = %s, description = %s, space_type = %s, price = %s, capacity = %s, 
+                desc_summary = %s, review_summary = %s, abstract = %s
+                WHERE id = %s
+                """, (space["name"], space["address"], space["description"], space["space_type"], str(space["price"]), str(space["capacity"]),
+                      desc_summary, review_summary, abstract, space_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {}
+
+#
+
+
+# Fetch all space ids
+def get_space_ids(provider_id) :
+    provider_id = str(provider_id)
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                SELECT id
+                FROM spaces
+                WHERE provider_id = %s
+                """, (provider_id,))
+    space_ids = cur.fetchall()
+    cur.close()
+    conn.close()
+    return space_ids
 
 # Fetch spaces desc_summary, review_summary
 def get_space_summary(space_id) :

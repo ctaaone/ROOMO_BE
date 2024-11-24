@@ -1,4 +1,5 @@
 from .db import connect_maindb
+from .space import get_space_ids
 
 # Returns true if reservation success, false otherwise
 def user_put_reservation(user_id, space_id, start_time, end_time) :
@@ -43,6 +44,23 @@ def delete_reservation(resv_id) :
     cur.close()
     conn.close()
 
+def get_reservations(provider_id) :
+    provider_id = str(provider_id)
+    space_id = get_space_ids(provider_id=provider_id)[0]
+
+    conn = connect_maindb()
+    cur = conn.cursor()
+    cur.execute("""
+                SELECT id, user_id, start_time, end_time,
+                FROM reservations
+                WHERE space_id = %s;
+                """, (space_id,))
+    fetch_result = cur.fetchall()
+    cur.close()
+    conn.close()
+    reservation_list = [{"id":r[0], "user_id":r[1], "start_time":r[2], "end_time":r[3]} for r in fetch_result]
+    return {"list" : reservation_list}
+
 def user_get_reservation(user_id) :
     user_id = str(user_id)
     conn = connect_maindb()
@@ -76,7 +94,7 @@ def user_get_reservation(user_id) :
     
     return {"list" : reservation_list}
 
-def space_get_review(space_id) :
+def get_reviews(space_id) :
     space_id = str(space_id)
 
     conn = connect_maindb()

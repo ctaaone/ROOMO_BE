@@ -2,8 +2,8 @@ from openai import OpenAI
 import re, os, json
 from .roles import useragent_main_role, useragent_request_role, useragent_recommend_role
 from .roles import useragent_reservation_role, useragent_inquiry_role
-from .roles import provider_inquiry_role
-from db import search_spaces, user_put_reservation, get_space_summary
+from .roles import provider_inquiry_role, provider_welcome_role, provider_main_role
+from db import search_spaces, user_put_reservation, get_space_summary, get_space_ids, get_reviews
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,7 +14,7 @@ provider_conversation_history = {}
 GPT_LIMIT = 500
 gpt_usage = 0
 
-def get_gpt(conversation, role, user_content="") :
+def get_gpt(conversation, role, user_content="", append=True) :
     global gpt_usage
     gpt_usage += 1
     if gpt_usage > GPT_LIMIT :
@@ -26,7 +26,7 @@ def get_gpt(conversation, role, user_content="") :
         messages=[{"role": "system", "content": role}] + conversation
     )
     ret = response.choices[0].message.content
-    conversation.append({"role": "assistant", "content": ret})
+    if append is True : conversation.append({"role": "assistant", "content": ret})
     return ret
 
 def useragent_main(content, tries, user_id):
@@ -135,6 +135,30 @@ def useragent_main(content, tries, user_id):
             print("Retry useragent_main")
             user_conversation_history = conversation_backup
             return useragent_main(content, tries+1, user_id)
+
+## Provider welcome
+def provider_welcome(provider_id) :
+    global provider_conversation_history
+
+    # Get only one space for now,,
+    space_id = get_space_ids(provider_id=provider_id)
+    reviews = get_reviews(space_id=space_id)["list"]
+    desc_summary, review_summary = get_space_summary(space_id=space_id)
+    # Create conversation if not exists
+    if space_id not in provider_conversation_history :
+        provider_conversation_history[space_id] = [{"role": "assistant", "content": f"공간에 대한 정보 :\n{desc_summary}\n 리뷰 요약 :\n{review_summary}"},]
+    gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_welcome_role+"다음은 리뷰 목록이야:\n"+json.dumps(reviews), append=False)
+    return {"type":"text", "content":gpt_response}
+
+## Provider agent
+def provide_agent_main(content, provider_id) :
+    global provider_conversation_history
+
+    # Get only one space for now,,
+    space_id = get_space_ids(provider_id=provider_id)
+    reviews = get_reviews(space_id=space_id)["list"]
+    gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_main_role+"다음은 공간에 대한 리뷰 목록이야:\n"+json.dumps(reviews), content="공간 제공자: "+content)
+    return {"type":"text", "content":gpt_response}
 
 def clear_user_history() :
     global user_conversation_history

@@ -1,7 +1,6 @@
 from .db import connect_maindb
 from .vectordb import search_near_vector, update_space_property
 from .reservation import get_reviews
-from agent import get_gpt
 
 # Get & Update space info for providers
 def provider_get_space(provider_id) :
@@ -36,6 +35,7 @@ def provider_update_space(provider_id, space) :
     conv2 = [{"role": "system", "content": "주어진 공간 리뷰들을 요약해서 어떤 공간인지 간략히 설명해줘. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
     conv3 = [{"role": "system", "content": "주어진 공간 설명과 리뷰를 요약해서 3줄정도로 해당 공간이 어떤 공간인지 요약해줘. ~입니다체를 사용해. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]
     reviews = get_reviews(space_id=space_id)
+    from agent import get_gpt
     desc_summary = get_gpt(content=space["description"], conv=conv1)
     review_summary = get_gpt(content='\n'.join(reviews), conv=conv2)
     abstract = get_gpt(content=space["description"] + '\n리뷰 목록\n' + '\n'.join(reviews), conv=conv3)

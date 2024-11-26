@@ -1,5 +1,4 @@
 from .db import connect_maindb
-from .space import get_space_ids
 
 # Returns true if reservation success, false otherwise
 def user_put_reservation(user_id, space_id, start_time, end_time) :
@@ -46,6 +45,7 @@ def delete_reservation(resv_id) :
 
 def get_reservations(provider_id) :
     provider_id = str(provider_id)
+    from .space import get_space_ids
     space_id = get_space_ids(provider_id=provider_id)[0]
 
     conn = connect_maindb()

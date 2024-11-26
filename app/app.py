@@ -13,7 +13,7 @@ CORS(app)
 
 # Default ids
 user_id = 0
-provider_id = 0
+provider_id = 1
 
 # User side chat
 @app.route('/userAgent', methods=['POST'])

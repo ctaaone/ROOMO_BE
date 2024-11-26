@@ -51,7 +51,7 @@ def get_reservations(provider_id) :
     conn = connect_maindb()
     cur = conn.cursor()
     cur.execute("""
-                SELECT id, user_id, start_time, end_time,
+                SELECT id, user_id, start_time, end_time
                 FROM reservations
                 WHERE space_id = %s
                 ORDER BY id DESC;

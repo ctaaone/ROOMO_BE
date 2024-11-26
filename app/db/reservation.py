@@ -53,7 +53,8 @@ def get_reservations(provider_id) :
     cur.execute("""
                 SELECT id, user_id, start_time, end_time,
                 FROM reservations
-                WHERE space_id = %s;
+                WHERE space_id = %s
+                ORDER BY id DESC;
                 """, (space_id,))
     fetch_result = cur.fetchall()
     cur.close()
@@ -70,7 +71,8 @@ def user_get_reservation(user_id) :
                 s.name, s.address, s.abstract, s.space_type, r.user_id
                 FROM reservations r
                 JOIN spaces s ON r.space_id = s.id
-                WHERE r.user_id = %s;
+                WHERE r.user_id = %s
+                ORDER BY r.id DESC;
                 """, (user_id,))
     fetch_result = cur.fetchall()
     cur.close()

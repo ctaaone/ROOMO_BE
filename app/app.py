@@ -80,7 +80,9 @@ def handle_provider_reservations():
 # Space reviews
 @app.route('/providerReviews', methods=['GET'])
 def handle_provider_reviews():
-    return jsonify(get_reviews(provider_id=provider_id))
+    from db import get_space_ids
+    space_id = get_space_ids(provider_id=provider_id)[0]
+    return jsonify(get_reviews(space_id=space_id))
 
 # Clear chat history
 @app.route('/clsUser', methods=['GET'])

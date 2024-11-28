@@ -81,7 +81,7 @@ def handle_provider_reservations():
 @app.route('/providerReviews', methods=['GET'])
 def handle_provider_reviews():
     from db import get_space_ids
-    space_id = get_space_ids(provider_id=provider_id)[0]
+    space_id = get_space_ids(provider_id=provider_id)[0][0]
     return jsonify(get_reviews(space_id=space_id))
 
 # Clear chat history

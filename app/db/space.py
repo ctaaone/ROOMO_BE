@@ -28,7 +28,7 @@ def provider_get_space(provider_id) :
 def provider_update_space(provider_id, space) :
     provider_id = str(provider_id)
     # Update only one for now
-    space_id = str(get_space_ids(provider_id=provider_id)[0])
+    space_id = str(get_space_ids(provider_id=provider_id)[0][0])
 
     ### Summarize & embedding update
     conv1 = [{"role": "system", "content": "주어진 공간 설명을 평문으로 정리해줘. 공간 설명에 관련된 내용들은 모두 포함하고, 그렇지 않은 내용은 포함하지 마. 길어도 괜찮음. 요약 과정 등 미사여구는 생략하고 요약 결과만 출력해."}]

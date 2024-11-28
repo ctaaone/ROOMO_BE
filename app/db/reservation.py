@@ -46,7 +46,7 @@ def delete_reservation(resv_id) :
 def get_reservations(provider_id) :
     provider_id = str(provider_id)
     from .space import get_space_ids
-    space_id = get_space_ids(provider_id=provider_id)[0]
+    space_id = get_space_ids(provider_id=provider_id)[0][0]
 
     conn = connect_maindb()
     cur = conn.cursor()

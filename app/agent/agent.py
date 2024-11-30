@@ -141,7 +141,7 @@ def provider_welcome(provider_id) :
     global provider_conversation_history
 
     # Get only one space for now,,
-    space_id = get_space_ids(provider_id=provider_id)
+    space_id = get_space_ids(provider_id=provider_id)[0][0]
     reviews = get_reviews(space_id=space_id)["list"]
     desc_summary, review_summary = get_space_summary(space_id=space_id)
     # Create conversation if not exists
@@ -155,7 +155,7 @@ def provide_agent_main(content, provider_id) :
     global provider_conversation_history
 
     # Get only one space for now,,
-    space_id = get_space_ids(provider_id=provider_id)
+    space_id = get_space_ids(provider_id=provider_id)[0][0]
     reviews = get_reviews(space_id=space_id)["list"]
     gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_main_role+"다음은 공간에 대한 리뷰 목록이야:\n"+json.dumps(reviews), content="공간 제공자: "+content)
     return {"type":"text", "content":gpt_response}

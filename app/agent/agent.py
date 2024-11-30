@@ -148,6 +148,7 @@ def provider_welcome(provider_id) :
     if space_id not in provider_conversation_history :
         provider_conversation_history[space_id] = [{"role": "assistant", "content": f"공간에 대한 정보 :\n{desc_summary}\n 리뷰 요약 :\n{review_summary}"},]
     gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_welcome_role+"다음은 리뷰 목록이야:\n"+json.dumps(reviews), append=False)
+    print(gpt_response)
     return {"type":"text", "content":gpt_response}
 
 ## Provider agent
@@ -158,6 +159,7 @@ def provide_agent_main(content, provider_id) :
     space_id = get_space_ids(provider_id=provider_id)[0][0]
     reviews = get_reviews(space_id=space_id)["list"]
     gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_main_role+"다음은 공간에 대한 리뷰 목록이야:\n"+json.dumps(reviews), content="공간 제공자: "+content)
+    print(gpt_response)
     return {"type":"text", "content":gpt_response}
 
 def clear_user_history() :

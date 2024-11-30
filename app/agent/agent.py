@@ -158,7 +158,7 @@ def provide_agent_main(content, provider_id) :
     # Get only one space for now,,
     space_id = get_space_ids(provider_id=provider_id)[0][0]
     reviews = get_reviews(space_id=space_id)["list"]
-    gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_main_role+"다음은 공간에 대한 리뷰 목록이야:\n"+json.dumps(reviews), content="공간 제공자: "+content)
+    gpt_response = get_gpt(conversation=provider_conversation_history[space_id], role=provider_main_role+"다음은 공간에 대한 리뷰 목록이야:\n"+json.dumps(reviews), user_content="공간 제공자: "+content)
     print(gpt_response)
     return {"type":"text", "content":gpt_response}
 

@@ -46,7 +46,7 @@ def insert_vector() :
         if space_id == "1" or space_id == "2" :
             desc_summary = "조명이 화려함. 아주 화려한 조명이 있다. 조명이 예쁜 연습실, 화려한 조명을 갖고 있는 연습실 " + desc_summary
         if space_id == "3" or space_id == "4" :
-            desc_summary = "공간이 넓음. 아주 넓은 공간의 연습실이다. 공간이 넓은 연습실이다. 넓은 연습실." + desc_summary
+            desc_summary = "공간이 넓음. 아주 넓은 공간의 연습실이다. 공간이 넓은 연습실이다. 넓은 연습실. 대형 연습실이다. 크기가 크다. 단체 연습에 적합하다. 단체 연습실." + desc_summary
         if space_id == "5" or space_id == "6" :
             desc_summary = "바닥이 탄성 마루이다. 탄성 마루인 바닥 재질. 바닥 재질이 탄성 마루인 연습실, 탄성 마루를 바닥 재질로 갖고 있는 연습실." + desc_summary
         if space_id == "7" or space_id == "8" :

@@ -58,7 +58,7 @@ def search_near_vector(user_text, space_ids) :
             operator: ContainsAny
             valueText: %s
         },
-        limit: 10) {
+        limit: 4) {
             space_id
         }
       }
